@@ -6,33 +6,36 @@ using Passwordless.Services;
 
 namespace Passwordless.Controllers
 {
+    public class LoginInput
+    {
+        public string Email { get; set; }
+    }
+
+    public class CheckInput
+    {
+        public string RequestCode { get; set; }
+    }
+
     // TODO: add cache value TTLs
     // TODO: add user check and creation
     public class AuthController: Controller 
     {
         protected readonly IMailService mailService;
         protected readonly IMemoryCache cache;
+        protected readonly IAuthService authService;
 
-        public AuthController(IMailService mailService, IMemoryCache cache)
+        public AuthController(IMailService mailService, IMemoryCache cache, IAuthService authService)
         {
             this.mailService = mailService;
             this.cache = cache;
+            this.authService = authService;
         }
 
         // Initially called by frontend
         [HttpPost("login")]
-        public async Task<string> Login([FromBody]string email)
+        public async Task<string> Login([FromBody] LoginInput input)
         {
-            var confirmationCode = Guid.NewGuid().ToString();
-            var requestCode = Guid.NewGuid().ToString();
-
-            cache.Set($"confirmation:{confirmationCode}", requestCode);
-            cache.Set($"request:{requestCode}", false);
-
-            await mailService.Send(email, confirmationCode);
-
-            return requestCode;
-
+            return await this.authService.Login(input.Email);
         }
 
         // Called from email message
@@ -55,11 +58,11 @@ namespace Passwordless.Controllers
 
         // Intervally checked frontend after initial login call success
         [HttpPost("check")]
-        public string Check([FromBody] string requestCode)
+        public string Check([FromBody] CheckInput input)
         {
             bool requestState;
 
-            if (!cache.TryGetValue<bool>($"request:{requestCode}",out requestState))
+            if (!cache.TryGetValue<bool>($"request:{input.RequestCode}",out requestState))
             {
                 return "Error";
             }
@@ -71,7 +74,8 @@ namespace Passwordless.Controllers
             }
 
             // TODO: return access and refresh token
-            return "logged in";
+            cache.Remove($"request:{input.RequestCode}");
+            return "logged";
         }
 
         public async Task Refresh()

@@ -27,6 +27,7 @@ namespace Passwordless
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IMailService, MailService>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddMemoryCache();
 
             services.AddControllers();
@@ -45,6 +46,11 @@ namespace Passwordless
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Passwordless v1"));
             }
+
+            app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
 
             app.UseRouting();

@@ -1,0 +1,39 @@
+html,
+body,
+#root,
+.app {
+  height: 100%;
+  background-color: rgb(36, 36, 36);
+  color: #fff;
+}
+
+.app {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.loginform {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+}
+
+.loginform > * + * {
+  margin-top: 16px;
+}
+
+.loginform > button,
+.loginform > input {
+  padding: 0 16px;
+  line-height: 30px;
+}
+
+.loginform > button {
+  background-color: crimson;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+}
